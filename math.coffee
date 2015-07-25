@@ -26,11 +26,24 @@ split = (string, token) ->
     [string[0...splitIndex], string[splitIndex + 1..-1]]
     
 parensPresent = (string) ->
-  string.indexOf(OPEN_PAREN) > -1 and string.indexOf(CLOSE_PAREN) > -1
+  openParenIndex = string.indexOf(OPEN_PAREN)
+  closeParenIndex = string.indexOf(CLOSE_PAREN)
+  openParenIndex > -1 and closeParenIndex > openParenIndex
+  
+getCloseParenIndex = (startIndex, string) ->
+  openParensInBetween = 0
+  
+  for char, i in string[startIndex..-1]
+      if openParensInBetween is 0 and char is CLOSE_PAREN
+          return startIndex + i
+      else if char is OPEN_PAREN
+          openParensInBetween += 1
+      else if char is CLOSE_PAREN and openParensInBetween > 0
+          openParensInBetween -= 1
   
 getParensSubstring = (string) ->
   startIndex = string.indexOf(OPEN_PAREN) + 1
-  endIndex =  string.lastIndexOf(CLOSE_PAREN) - 1
+  endIndex = getCloseParenIndex(startIndex, string) - 1
   string[startIndex..endIndex]
 
 toTree = (string) ->
@@ -57,7 +70,7 @@ process = (node) ->
 
 evaluate = (input) -> process(toTree(input))
 
-str = "(2 ^ (15 / (2 + 1 * 3))) + 1" 
+str = "((1 + 1) ^ (15 / (2 + 1 * 3))) + (1)" 
 result = evaluate str
 
 console.log "#{str} = #{result}"
